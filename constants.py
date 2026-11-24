@@ -1,0 +1,114 @@
+#
+# Copyright (c) FIRST and other WPILib contributors.
+# Open Source Software; you can modify and/or share it under the terms of
+# the WPILib BSD license file in the root directory of this project.
+#
+
+"""
+The constants module provides a convenient place for teams to hold robot-wide
+numerical or boolean constants. This module should not be used for any other
+purpose. Do not put anything functional in this module.
+"""
+
+import math
+
+from wpimath import (
+    SwerveDrive4Kinematics,
+    TrapezoidProfileRadiansConstraints,
+    Translation2d,
+    units,
+)
+
+
+class NeoMotorConstants:
+    FREE_SPEED_RPM = 5676
+
+
+class DriveConstants:
+    # Driving Parameters - Note that these are not the maximum capable speeds of
+    # the robot, rather the allowed maximum speeds
+    MAX_SPEED_METERS_PER_SECOND = 4.8
+    MAX_ANGULAR_SPEED = 2 * math.pi  # radians per second
+
+    # Chassis configuration
+    TRACK_WIDTH = units.inches_to_meters(26.5)
+    # Distance between centers of right and left wheels on robot
+    WHEEL_BASE = units.inches_to_meters(26.5)
+    # Distance between front and back wheels on robot
+    DRIVE_KINEMATICS = SwerveDrive4Kinematics(
+        Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+        Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+        Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),
+        Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+    )
+
+    # Angular offsets of the modules relative to the chassis in radians
+    FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = -math.pi / 2
+    FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = 0
+    BACK_LEFT_CHASSIS_ANGULAR_OFFSET = math.pi
+    BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = math.pi / 2
+
+    # SPARK MAX CAN IDs
+    FRONT_LEFT_DRIVING_CAN_ID = 12
+    REAR_LEFT_DRIVING_CAN_ID = 16
+    FRONT_RIGHT_DRIVING_CAN_ID = 14
+    REAR_RIGHT_DRIVING_CAN_ID = 18
+
+    FRONT_LEFT_TURNING_CAN_ID = 11
+    REAR_LEFT_TURNING_CAN_ID = 15
+    FRONT_RIGHT_TURNING_CAN_ID = 13
+    REAR_RIGHT_TURNING_CAN_ID = 17
+
+    GYRO_REVERSED = False
+
+
+class ModuleConstants:
+    # The MAXSwerve module can be configured with one of three pinion gears: 12T,
+    # 13T, or 14T. This changes the drive speed of the module (a pinion gear with
+    # more teeth will result in a robot that drives faster).
+    DRIVING_MOTOR_PINION_TEETH = 14
+
+    # Calculations required for driving motor conversion factors and feed forward
+    DRIVING_MOTOR_FREE_SPEED_RPS = NeoMotorConstants.FREE_SPEED_RPM / 60
+    WHEEL_DIAMETER_METERS = 0.0762
+    WHEEL_CIRCUMFERENCE_METERS = WHEEL_DIAMETER_METERS * math.pi
+    # 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
+    # teeth on the bevel pinion
+    DRIVING_MOTOR_REDUCTION = (45.0 * 22) / (DRIVING_MOTOR_PINION_TEETH * 15)
+    DRIVE_WHEEL_FREE_SPEED_RPS = (
+        DRIVING_MOTOR_FREE_SPEED_RPS * WHEEL_CIRCUMFERENCE_METERS
+    ) / DRIVING_MOTOR_REDUCTION
+
+    # REVLib 2027 has no encoder conversion factors: the SPARKs report and take
+    # setpoints in native units (motor rotations and RPM for the driving encoder,
+    # rotations for the absolute encoder). These factors convert between those
+    # native units and the meters and radians that WPILib's swerve classes use.
+    DRIVING_ENCODER_POSITION_FACTOR = (
+        WHEEL_DIAMETER_METERS * math.pi / DRIVING_MOTOR_REDUCTION
+    )  # meters per motor rotation
+    DRIVING_ENCODER_VELOCITY_FACTOR = (
+        DRIVING_ENCODER_POSITION_FACTOR / 60.0
+    )  # meters per second per RPM
+    TURNING_ENCODER_POSITION_FACTOR = 2 * math.pi  # radians per rotation
+
+
+class OIConstants:
+    DRIVER_CONTROLLER_PORT = 0
+    DRIVE_DEADBAND = 0.05
+
+
+class AutoConstants:
+    MAX_SPEED_METERS_PER_SECOND = 3
+    MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3
+    MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = math.pi
+    MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED = math.pi
+
+    P_X_CONTROLLER = 1
+    P_Y_CONTROLLER = 1
+    P_THETA_CONTROLLER = 1
+
+    # Constraint for the motion profiled robot angle controller
+    THETA_CONTROLLER_CONSTRAINTS = TrapezoidProfileRadiansConstraints(
+        MAX_ANGULAR_SPEED_RADIANS_PER_SECOND,
+        MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED,
+    )
